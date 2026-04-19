@@ -419,6 +419,9 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       MINIMAX_API_KEY: ${MINIMAX_API_KEY:-}
+      LLM_GATEWAY_URL: ${LLM_GATEWAY_URL:-http://llm-gateway:4000}
+      LLM_VIRTUAL_KEY: ${LLM_VIRTUAL_KEY:-${LITELLM_MASTER_KEY:-nasiko-dev-virtual-key}}
+      LLM_GATEWAY_MODEL: ${LLM_GATEWAY_MODEL:-platform-default}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./agents:/app/agents:ro

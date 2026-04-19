@@ -10,7 +10,9 @@ import yaml
 REPO_ROOT = Path(__file__).resolve().parents[3]
 COMPOSE_FILE = REPO_ROOT / "docker-compose.local.yml"
 TRANSLATOR_MAIN = REPO_ROOT / "agents/a2a-translator/src/__main__.py"
+TRANSLATOR_EXECUTOR = REPO_ROOT / "agents/a2a-translator/src/openai_agent_executor.py"
 TRANSLATOR_COMPOSE = REPO_ROOT / "agents/a2a-translator/docker-compose.yml"
+LITELLM_CONFIG = REPO_ROOT / "orchestrator/litellm_config.yaml"
 
 
 class TestLLMGatewayIntegration(unittest.TestCase):
@@ -48,7 +50,21 @@ class TestLLMGatewayIntegration(unittest.TestCase):
         text = TRANSLATOR_MAIN.read_text(encoding="utf-8")
         self.assertIn("elif os.getenv(\"OPENROUTER_API_KEY\")", text)
         self.assertIn("elif os.getenv(\"MINIMAX_API_KEY\")", text)
+        self.assertIn("os.getenv(\"OPENROUTER_API_KEY\")", text)
         self.assertIn("os.getenv(\"OPENAI_API_KEY\")", text)
+
+    def test_provider_rotation_is_config_driven(self):
+        config = yaml.safe_load(LITELLM_CONFIG.read_text(encoding="utf-8"))
+        models = {entry["model_name"]: entry["litellm_params"]["model"] for entry in config["model_list"]}
+        self.assertIn("platform-default", models)
+        self.assertIn("anthropic-default", models)
+        self.assertIn("${LITELLM_PROVIDER_MODEL", models["platform-default"])
+        self.assertIn("${LITELLM_ANTHROPIC_MODEL", models["anthropic-default"])
+
+    def test_gateway_calls_preserve_trace_context_headers(self):
+        text = TRANSLATOR_EXECUTOR.read_text(encoding="utf-8")
+        self.assertIn("inject(headers)", text)
+        self.assertIn("extra_headers=self._build_gateway_headers() if self.use_gateway else None", text)
 
     def test_live_gateway_healthcheck_optional(self):
         if os.getenv("NASIKO_RUN_DOCKER_INTEGRATION") != "1":

@@ -89,6 +89,7 @@ class OpenAIAgentExecutor(AgentExecutor):
                     tool_choice="auto" if openai_tools else None,
                     temperature=0.1,
                     max_tokens=4000,
+                    extra_headers=self._build_gateway_headers() if self.use_gateway else None,
                 )
 
                 message = response.choices[0].message

@@ -35,6 +35,10 @@ def main(host: str, port: int):
         api_key = os.getenv("LLM_VIRTUAL_KEY")
         base_url = os.getenv("LLM_GATEWAY_URL")
     elif os.getenv("OPENROUTER_API_KEY"):
+        api_key = os.getenv("OPENROUTER_API_KEY")
+        base_url = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+        model = os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini")
+    elif os.getenv("MINIMAX_API_KEY"):
         api_key = os.getenv("MINIMAX_API_KEY")
         base_url = os.getenv("MINIMAX_BASE_URL", "https://api.minimax.io/v1")
         model = os.getenv("MINIMAX_MODEL", "MiniMax-M2.7")
